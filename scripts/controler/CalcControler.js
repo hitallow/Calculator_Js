@@ -25,14 +25,13 @@ class CalcControler{
 	setError(){
 		this.displayCalc = 'Error';
 	}
-	// limpa toda a tela
+	// remove todos os elementos do array
 	clearAll(){
 		this._operation = [];
-		this.displayCalc = '0';
 	}
+	// remove o ultimo elemento do array
 	clearEntry(){
 		this._operation.pop();
-		this.showDisplay();
 	}
 	getLastOperation(){
 		return this._operation[this._operation.length - 1];
@@ -40,71 +39,102 @@ class CalcControler{
 	isOperation(value){
 		return (['/','*','%','+','-'].indexOf(value)> -1);
 	}
+	isNotNumber(value){
+		if(value.toString() =='Infinity' ){
+			return true;
+		}
+	}
 	calc(){
 		let last = this._operation.pop();
 		let result = eval(this._operation.join(''));
+		console.log('result ->',result);
+		
 		if(last == '%'){
 			result /= 100; 
 			this._operation = [result];
-		}else{
-			this._operation = [result, last];
+			return true;
+		}else if(this.isNotNumber(result)){
+			return false;
 		}
+		else{
+			console.log('entrei no else');
+			this._operation = [result, last];
+			return true;
+		}
+		
 		
 		
 	}
 	pushOperation(value){
 		this._operation.push(value);
 		if(this._operation.length > 3){
-			this.calc();	
+			return this.calc();				
 		}
-		this.showDisplay();
-	}
-		// adciona uma opração ao array operation
-	addOperation(value){
 		
-		if(this._operation.length == 0){
+	}
+	// adciona uma operação ao array operation
+	addOperation(value){
+		let error = '';
+		if(this._operation.length == 0 && !this.isOperation(value)){
 			this._operation.push(parseInt(value));
+		}
+		else if(this._operation.length == 0 && this.isOperation(value)){
+			if('+ -'.indexOf(value)>-1){
+				this.pushOperation(value);
+			}else{
+				alert('Adcione primeiro um numero');
+			}
 		}
 		else if(value.indexOf('=')> -1){
 
 			let expressao = this._operation.join('');
 			let result = eval(expressao);
-			this._operation = [result];
-			this.showDisplay();
+			error = this._operation = [result];
+			
 		}
 		else if(isNaN(this.getLastOperation())){
 			if(this.isOperation(value)){
 				this._operation.pop();
-				this.pushOperation(value);
+				error = this.pushOperation(value);
 			}else{
-				this._operation.push(parseInt(value));
+				error = this._operation.push(parseInt(value));
 			}
 		}else{
 			if(this.isOperation(value)){
-				this.pushOperation(value);
+				error = this.pushOperation(value);
 			}else{
 				this.setLastOperation(value);
 			}
 		}
 		console.log(this._operation);
-		this.showDisplay();
+		this.showDisplay(error);
 	}
 	setLastOperation(value){
 		this._operation[this._operation.length - 1] =parseInt(
 				 this._operation[this._operation.length - 1].toString()+value.toString());
 	}
-	showDisplay(){
-		this.displayCalc = (this._operation).join('');
-	}
+	showDisplay(setError){
+		if(this._operation.length == 0 ){
+		
+			this.displayCalc = '0';
+		}else if(setError){
+			this.displayCalc = 'ERRO';
+		}
+		else{
+			this.displayCalc  = this._operation.join('');
+		}	
+}
 
 
 	execBtn(value){
 		switch (value){
 			case 'ac':
 				this.clearAll();
+				this.showDisplay();
 				break;
 			case 'ce':
 				this.clearEntry();
+				this.showDisplay();
 				break;
 			case 'soma':
 				this.addOperation('+');
