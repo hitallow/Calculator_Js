@@ -50,6 +50,15 @@ class CalcControler{
 		return eval(this._operation.join(''));
 	}
 	calc(){
+
+		this._operation = [ this.getResult()]; 
+		console.log(this._operation);
+		
+		return;
+
+
+
+
 		let last = '';
 		this._lastOperator = this.getLastItem();
 		if(this._operation.length <3 ){
@@ -63,6 +72,22 @@ class CalcControler{
 			last = this._operation.pop();
 			 
 			 this._lastNumber = this.getLastItem(false);
+		}
+		
+		let result = this.getResult();
+
+		
+		if(last == '%'){
+			result /= 100; 
+			this._operation = [result];
+			return true;
+		}else if(this.isNotNumber(result)){
+			return false;
+		}
+		else{
+			console.log('entrei no else');
+			this._operation = [result, last];
+			return true;
 		}
 	}
 	getLastItem(isOperator = true){
@@ -85,23 +110,33 @@ class CalcControler{
 		this.displayCalc = lastNumber;
 	}
 	pushOperation(value){
+		console.log('entrei no push operation');
 		this._operation.push(value);
-		if(this._operation.length > 3){
-			return this.calc();				
+		console.log('index of ->', value.indexOf("="));
+		if(this._operation.length >= 3){
+			console.log("entrei no if");
+			this.calc();				
 		}
+		console.log("não entrei em nada");
 		
 	}
 	// adciona uma operação ao array operation
 	addOperation(value){
 		let error = '';
-		if(this._operation.length == 0 && !this.isOperation(value)){
+		if(this._operation.length >= 3 && value == '='){
+			this.calc();
+		
+		}
+		// verifica se o vetor está vazio, e se não é algo como '= / * %' 
+		else if(this._operation.length == 0 && !this.isOperation(value)){
 			this._operation.push(parseInt(value));
 		}else if(this._operation.length == 0 && this.isOperation(value)){
 			if('+ -'.indexOf(value)>-1){
 				this.pushOperation(value);
 			}else{
-				alert('Adcione primeiro um numero');
+				alert('Adcione primeiro um número');
 			}
+		// verifica se o ultimo operador é um valor  numerico ou sinal
 		}else if(isNaN(this.getLastOperation())){
 			if(this.isOperation(value)){
 				this._operation.pop();
@@ -116,6 +151,7 @@ class CalcControler{
 				this.setLastOperation(value);
 			}
 		}
+		console.log(value);
 		console.log(this._operation);
 		this.showDisplay();	
 		
