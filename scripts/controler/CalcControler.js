@@ -47,47 +47,33 @@ class CalcControler{
 		}
 	}
 	getResult(){
+		console.log('resolvendo ->', this._operation.join(''));
 		return eval(this._operation.join(''));
 	}
+
+
+	existPorcent(){
+		for(let i = 0; i< this._operation.length ; i++){
+			let aux = this._operation[i].toString();
+			if(aux.indexOf('%')>-1){
+				return aux.substring(0, aux.indexOf('%'));
+			}
+		}
+		return false;
+	}
 	calc(){
-
-		this._operation = [ this.getResult()]; 
-		console.log(this._operation);
-		
-		return;
-
-
-
-
-		let last = '';
-		this._lastOperator = this.getLastItem();
-		if(this._operation.length <3 ){
-			let firstItem = this._operation[0];
-			this._operation = [firstItem, this._lastOperator, this.lastNumber];
-		}
 		if(this._operation.length > 3){
-			 last = this._operation.pop();
-			 this._lastNumber = this.getResult();
-		}else if(this._operation.length == 3){
-			last = this._operation.pop();
-			 
-			 this._lastNumber = this.getLastItem(false);
-		}
-		
-		let result = this.getResult();
+			let last = this._operation.pop();
+			let result = this.getResult();
+			if(last == '%'){
+				result /= 100; 
+				this._operation = [result];
 
-		
-		if(last == '%'){
-			result /= 100; 
-			this._operation = [result];
-			return true;
-		}else if(this.isNotNumber(result)){
-			return false;
-		}
-		else{
-			console.log('entrei no else');
-			this._operation = [result, last];
-			return true;
+			}else{
+				this._operation = [result, last];
+			}
+		}else{
+			this._operation = [this.getResult()];
 		}
 	}
 	getLastItem(isOperator = true){
@@ -110,55 +96,59 @@ class CalcControler{
 		this.displayCalc = lastNumber;
 	}
 	pushOperation(value){
-		console.log('entrei no push operation');
 		this._operation.push(value);
-		console.log('index of ->', value.indexOf("="));
-		if(this._operation.length >= 3){
-			console.log("entrei no if");
+		if(this._operation.length > 3){
 			this.calc();				
-		}
-		console.log("não entrei em nada");
-		
+		}			
 	}
-	// adciona uma operação ao array operation
+
+	// adciona uma operação ao array operation, CONTROLADOR 
 	addOperation(value){
 		let error = '';
-		if(this._operation.length >= 3 && value == '='){
+		if(value == '%'){
+			this.pushOperation(value);			
+		}
+		// Se for pedido pra fazer o cálculo e tiver mais que 3 elementos, é feito o cálculo
+		else if(this._operation.length >= 3 || value == '='){
 			this.calc();
-		
+
 		}
 		// verifica se o vetor está vazio, e se não é algo como '= / * %' 
 		else if(this._operation.length == 0 && !this.isOperation(value)){
 			this._operation.push(parseInt(value));
-		}else if(this._operation.length == 0 && this.isOperation(value)){
+			
+		}//verifica se o vetor está vazio, se estiver, e for pedido pra adcionar um valor diferente de
+		// + ou - , ele reclama, caso contrário, adciona
+		else if(this._operation.length == 0 && this.isOperation(value)){
 			if('+ -'.indexOf(value)>-1){
 				this.pushOperation(value);
 			}else{
 				alert('Adcione primeiro um número');
 			}
-		// verifica se o ultimo operador é um valor  numerico ou sinal
+		// verifica se o ultimo operador é sinal
 		}else if(isNaN(this.getLastOperation())){
+			// se for um sinal, ele remove o ultimo sinal, e adciona o novo;
+			
 			if(this.isOperation(value)){
-				this._operation.pop();
-				 this.pushOperation(value);
+				this.changeOperation(value);
 			}else{
+				// caso não seja, ele adciona
 				 this._operation.push(parseInt(value));
 			}
 		}else{
-			if(this.isOperation(value)){
-				 this.pushOperation(value);
-			}else{
-				this.setLastOperation(value);
-			}
+			 this.pushOperation(value);
 		}
-		console.log(value);
-		console.log(this._operation);
+
 		this.showDisplay();	
 		
 	}
+	changeOperation(value){
+		this._operation.pop();
+		this._operation.push(value);
+	}
 	setLastOperation(value){
-		this._operation[this._operation.length - 1] =parseInt(
-				 this._operation[this._operation.length - 1].toString()+value.toString());
+		this._operation[this._operation.length - 1] =(
+				this._operation[this._operation.length - 1].toString()+value.toString());
 	}
 	showDisplay(){
 		if(this._operation.length == 0 ){
