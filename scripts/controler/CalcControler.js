@@ -39,7 +39,7 @@ class CalcControler{
 		return this._operation[this._operation.length - 1];
 	}
 	isOperation(value){
-		return (['/','*','%','+','-'].indexOf(value)> -1);
+		return (['/','*','%','+','-','.'].indexOf(value)> -1);
 	}
 	isNotNumber(value){
 		if(value.toString() =='Infinity' ){
@@ -47,7 +47,7 @@ class CalcControler{
 		}
 	}
 	getResult(){
-		console.log('resolvendo ->', this._operation.join(''));
+
 		return eval(this._operation.join(''));
 	}
 
@@ -96,12 +96,29 @@ class CalcControler{
 		this.displayCalc = lastNumber;
 	}
 	pushOperation(value){
-		this._operation.push(value);
+		if(!isNaN(this.getLastOperation())){
+			this.setLastOperation(value);
+		}else{
+			this._operation.push(value);
+		}
 		if(this._operation.length > 3){
 			this.calc();				
 		}			
 	}
+	addDot(){
+		let lastOperation = this.getLastOperation();
+		console.log('111');
+		console.log(this.isOperation(lastOperation));
+		console.log(lastOperation);
 
+		if(this.isOperation(lastOperation)|| !lastOperation){
+			console.log('entrei aqui');
+			this.pushOperation('0.');
+		}else{
+			this._operation[this._operation.length -1 ] = 
+							this._operation[this._operation.length -1 ].toString() + '.';   
+		}
+	}
 	// adciona uma operação ao array operation, CONTROLADOR 
 	addOperation(value){
 		let error = '';
@@ -115,7 +132,8 @@ class CalcControler{
 		}
 		// verifica se o vetor está vazio, e se não é algo como '= / * %' 
 		else if(this._operation.length == 0 && !this.isOperation(value)){
-			this._operation.push(parseInt(value));
+			this._operation.push((value));
+
 			
 		}//verifica se o vetor está vazio, se estiver, e for pedido pra adcionar um valor diferente de
 		// + ou - , ele reclama, caso contrário, adciona
@@ -133,13 +151,15 @@ class CalcControler{
 				this.changeOperation(value);
 			}else{
 				// caso não seja, ele adciona
-				 this._operation.push(parseInt(value));
+				//this.setLastOperation(value); 
+				this._operation.push((value));
 			}
+			
 		}else{
+			
 			 this.pushOperation(value);
 		}
 
-		this.showDisplay();	
 		
 	}
 	changeOperation(value){
@@ -147,7 +167,7 @@ class CalcControler{
 		this._operation.push(value);
 	}
 	setLastOperation(value){
-		this._operation[this._operation.length - 1] =(
+			this._operation[this._operation.length - 1] = (
 				this._operation[this._operation.length - 1].toString()+value.toString());
 	}
 	showDisplay(){
@@ -161,14 +181,13 @@ class CalcControler{
 
 
 	execBtn(value){
+
 		switch (value){
 			case 'ac':
 				this.clearAll();
-				this.showDisplay();
 				break;
 			case 'ce':
 				this.clearEntry();
-				this.showDisplay();
 				break;
 			case 'soma':
 				this.addOperation('+');
@@ -188,8 +207,9 @@ class CalcControler{
 			case 'multiplicacao':
 				this.addOperation('*');
 				break;
-			case '.':
-				this.addOperation('.');
+			case 'ponto':
+				this.addDot('.');
+				
 				break;
 			case '1':
 			case '2':
@@ -207,7 +227,7 @@ class CalcControler{
 				this.setError();
 				break;
 		}
-
+		this.showDisplay();
 	}
 
 	initButtonsEvents(){
