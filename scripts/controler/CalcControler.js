@@ -9,6 +9,7 @@ class CalcControler{
 		this._lastNumber = '';
 		this.initialize();
 		this.initButtonsEvents();
+		this.initKeyboard();
 	}
 	initialize(){
 		this.setDisplayDateTime();
@@ -16,6 +17,52 @@ class CalcControler{
 			this.setDisplayDateTime();
 
 		},1000);
+
+	}
+
+	initKeyboard(){
+		document.addEventListener('keyup', e=>{
+			console.log(e.key);
+			switch (e.key){
+				case 'Escape':
+					this.clearAll();
+					break;
+				case 'Backspace':
+					this.clearEntry();
+					break;
+				case '+':
+				case '-':
+				case '%':
+				case '*':
+				case '/':
+					this.addOperation(e.key);
+					break;
+				case '=':
+				case 'Enter':
+					this.addOperation('=');
+					break;
+				
+				case 'ponto':
+				case ',':
+					this.addDot('.');
+					break;
+				case '1':
+				case '2':
+				case '3':
+				case '4':
+				case '5':
+				case '6':
+				case '7':
+				case '8':
+				case '9':
+				case '0':
+					this.addOperation(e.key);
+					break;
+
+			}
+			this.showDisplay();
+
+		});
 
 	}
 	addEventListenerAll(element, events, fn){
@@ -110,7 +157,9 @@ class CalcControler{
 		console.log('111');
 		console.log(this.isOperation(lastOperation));
 		console.log(lastOperation);
-
+		if(lastOperation.indexOf('.')>-1){
+			return;
+		}
 		if(this.isOperation(lastOperation)|| !lastOperation){
 			console.log('entrei aqui');
 			this.pushOperation('0.');
