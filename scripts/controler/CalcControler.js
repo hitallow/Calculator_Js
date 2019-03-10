@@ -1,5 +1,7 @@
 class CalcControler{
 	constructor(){
+		this._audio = new Audio('click.mp3');
+		this._onAudio = false;
 		this._locale  = "pt-BR";
 		this._operation = [];
 		this._displayCalcEl = document.querySelector('#display');
@@ -10,6 +12,7 @@ class CalcControler{
 		this.initialize();
 		this.initButtonsEvents();
 		this.initKeyboard();
+		this.pastFromClipboard();
 	}
 	initialize(){
 		this.setDisplayDateTime();
@@ -17,12 +20,29 @@ class CalcControler{
 			this.setDisplayDateTime();
 
 		},1000);
+		document.querySelectorAll('.btn-ac').forEach(btn=>{
+			btn.addEventListener('dblclick',e=>{
+				this.toggleAudio();
+
+			});
+
+		});
 
 	}
+	toggleAudio(){
+		this._onAudio = !this._onAudio;
+	}
 
+	playAudio(){
+		if(this._onAudio){
+			this._audio.currentTime = 0;
+			this._audio.play();
+		}
+	}
 	initKeyboard(){
 		document.addEventListener('keyup', e=>{
-			console.log(e.key);
+			
+			this.playAudio();
 			switch (e.key){
 				case 'Escape':
 					this.clearAll();
@@ -58,6 +78,11 @@ class CalcControler{
 				case '0':
 					this.addOperation(e.key);
 					break;
+				case 'c':
+					if(e.ctrlKey)
+						this.copyToClipboard();
+					break;
+
 
 			}
 			this.showDisplay();
@@ -154,11 +179,14 @@ class CalcControler{
 	}
 	addDot(){
 		let lastOperation = this.getLastOperation();
-		console.log('111');
+	
 		console.log(this.isOperation(lastOperation));
 		console.log(lastOperation);
-		if(lastOperation.indexOf('.')>-1){
-			return;
+		if(lastOperation){
+			if(lastOperation.indexOf('.')>-1){
+				console.log('entrei no primeiro if');
+				return;
+			}
 		}
 		if(this.isOperation(lastOperation)|| !lastOperation){
 			console.log('entrei aqui');
@@ -211,26 +239,51 @@ class CalcControler{
 
 		
 	}
+
+	//  muda  a operação
 	changeOperation(value){
 		this._operation.pop();
 		this._operation.push(value);
 	}
+	// altera o ultimo elemento
 	setLastOperation(value){
 			this._operation[this._operation.length - 1] = (
 				this._operation[this._operation.length - 1].toString()+value.toString());
 	}
+	// copiar para a área de transferencia
+	copyToClipboard(){
+		let input = document.createElement('input');
+
+		input.value =  this.displayCalc;
+		
+		document.body.appendChild(input);
+		input.select();
+		document.execCommand('copy');
+		input.remove();
+	}
+	//colar da area de transferencia
+	pastFromClipboard(){
+		document.addEventListener('paste',e =>{
+			let text = e.clipboardData.getData('Text');
+			this.addOperation(text);
+			console.log(text);
+		});
+	}
+	//mostrar o display
 	showDisplay(){
 		if(this._operation.length == 0 ){
 		
 			this.displayCalc = '0';
 		}else{
-			this.displayCalc  = this._operation.join('');
+			//this.displayCalc = this.getLastItem(true);
+			this.displayCalc = this.getLastOperation();
+			//this.displayCalc  = this._operation.join('');
 		}	
-}
+	}
 
-
+	// 
 	execBtn(value){
-
+		this.playAudio();
 		switch (value){
 			case 'ac':
 				this.clearAll();
@@ -293,7 +346,7 @@ class CalcControler{
 			});
 		});
 	}
-	
+	// pega a data atual
 	setDisplayDateTime(){
 		this.displayDate = this.currentDate.toLocaleDateString(this._locale, {
 			day: '2-digit',
