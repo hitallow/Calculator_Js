@@ -134,6 +134,7 @@ class CalcControler{
 		return false;
 	}
 	calc(){
+		try{
 		if(this._operation.length > 3){
 			let last = this._operation.pop();
 			let result = this.getResult();
@@ -147,6 +148,9 @@ class CalcControler{
 		}else{
 			this._operation = [this.getResult()];
 		}
+	}catch(e){
+		this.setError();
+	}
 	}
 	getLastItem(isOperator = true){
 		let lastItem ;
@@ -369,6 +373,12 @@ class CalcControler{
 	}
 
 	set displayCalc(newValue){
+		if(newValue.toString().length > 10){
+			this.setError();
+			alert('valor estourou a capacidade da calculadora');
+			this._displayCalcEl.innerHTML = 0;	
+			return;
+		}
 		this._displayCalcEl.innerHTML = newValue;
 	}
 
